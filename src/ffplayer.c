@@ -696,9 +696,11 @@ static void* av_demux_thread_proc(void *param)
         }
         if ((packet = pktqueue_request_packet(player->pktqueue)) == NULL) continue;
 
-        if (player->vcodec_context->width < 3840 || player->vcodec_context->height < 2160) {
-            player_send_message(player->cmnvars.winmsg, MSG_NOT_4K, 0);
-            break;
+        if (player->vcodec_context != NULL) {
+            if (player->vcodec_context->width < 3840 || player->vcodec_context->height < 2160) {
+                player_send_message(player->cmnvars.winmsg, MSG_NOT_4K, 0);
+                break;
+            }
         }
 
         frame_rate = (float)player->vfrate.num / player->vfrate.den;
