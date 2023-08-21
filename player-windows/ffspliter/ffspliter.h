@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-// 类型定义
+// type definition
 typedef void (*PFN_SPC)(__int64 cur, __int64 total); // split progress callback
 
 // function declaration

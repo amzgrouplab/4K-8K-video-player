@@ -696,11 +696,9 @@ static void* av_demux_thread_proc(void *param)
         }
         if ((packet = pktqueue_request_packet(player->pktqueue)) == NULL) continue;
 
-        if (player->vcodec_context != NULL) {
-            if (player->vcodec_context->width < 3840 || player->vcodec_context->height < 2160) {
-                player_send_message(player->cmnvars.winmsg, MSG_NOT_4K, 0);
-                break;
-            }
+        if (player->vcodec_context->width < 3840 || player->vcodec_context->height < 2160) {
+            player_send_message(player->cmnvars.winmsg, MSG_NOT_4K, 0);
+            break;
         }
 
         frame_rate = (float)player->vfrate.num / player->vfrate.den;
@@ -1028,11 +1026,6 @@ void player_setrect(void *hplayer, int type, int x, int y, int w, int h)
 void player_seek(void *hplayer, int64_t ms, int type)
 {
     if (!hplayer) return;
-    //sa-added
-    //MAINPLAYER* mainplayer = (MAINPLAYER*)hplayer;
-    //PLAYER* rear_player = mainplayer->rear_player;
-    //PLAYER* front_player = mainplayer->front_player;
-    //PLAYER *player = (PLAYER*)hplayer;
 
     MAINPLAYER* mainplayer = (MAINPLAYER*)hplayer;
     PLAYER* rear_player;
@@ -1046,13 +1039,13 @@ void player_seek(void *hplayer, int64_t ms, int type)
         switch (type) {
             case SEEK_STEP_FORWARD:
                 rear_player->seek_dest = rear_player->seek_dest + ms;
-                rear_player->seek_pos = (rear_player->seek_dest + ms) * AV_TIME_BASE / 1000;
+                rear_player->seek_pos = (rear_player->cmnvars.vpts + ms) * AV_TIME_BASE / 1000;
                 rear_player->seek_diff = 100;
                 rear_player->seek_sidx = -1;
                 break;
             case SEEK_STEP_BACKWARD:
                 rear_player->seek_dest = rear_player->seek_dest - ms < 0 ? 0 : rear_player->seek_dest - ms;
-                rear_player->seek_pos = (rear_player->seek_dest - ms < 0 ? 0 : rear_player->seek_dest - ms) * AV_TIME_BASE / 1000;
+                rear_player->seek_pos = (rear_player->cmnvars.vpts - ms < 0 ? 0 : rear_player->cmnvars.vpts - ms) * AV_TIME_BASE / 1000;
                 rear_player->seek_diff = 100;
                 rear_player->seek_sidx = -1;
                 break;
@@ -1078,32 +1071,21 @@ void player_seek(void *hplayer, int64_t ms, int type)
     }
     switch (type) {
         case SEEK_STEP_FORWARD:
-            front_player->seek_dest = front_player->seek_dest + 5000;
-            front_player->seek_pos = (front_player->seek_dest + 5000) * AV_TIME_BASE / 1000;
+            front_player->seek_dest = front_player->seek_dest + ms;
+            front_player->seek_pos = (front_player->cmnvars.vpts + ms) * AV_TIME_BASE / 1000;
             front_player->seek_diff = 100;
             front_player->seek_sidx = -1;
             break;
-            /*render_pause(front_player->render, 1);
-            render_setparam(front_player->render, PARAM_RENDER_STEPFORWARD, NULL);
-            return;*/
         case SEEK_STEP_BACKWARD:
-            front_player->seek_dest = front_player->seek_dest - 5000 < 0 ? 0 : front_player->seek_dest - 5000;
-            front_player->seek_pos = (front_player->seek_dest - 5000 < 0 ? 0 : front_player->seek_dest - 5000) * AV_TIME_BASE / 1000;
+            front_player->seek_dest = front_player->seek_dest - ms < 0 ? 0 : front_player->seek_dest - ms;
+            front_player->seek_pos = (front_player->cmnvars.vpts - ms < 0 ? 0 : front_player->cmnvars.vpts - ms) * AV_TIME_BASE / 1000;
             front_player->seek_diff = 100;
             front_player->seek_sidx = -1;
             break;
-            /*front_player->seek_dest = av_rescale_q(front_player->seek_vpts, front_player->vstream_timebase, TIMEBASE_MS) - 1000 * front_player->vfrate.den / front_player->vfrate.num - 1;
-            front_player->seek_pos = front_player->seek_vpts + av_rescale_q(ms, TIMEBASE_MS, front_player->vstream_timebase);
-            front_player->seek_diff = 0;
-            front_player->seek_sidx = front_player->vstream_index;
-            pthread_mutex_lock(&front_player->lock);
-            front_player->status   |= PS_R_PAUSE;
-            pthread_mutex_unlock(&front_player->lock);
-            break;*/
         default:
             front_player->seek_dest = front_player->cmnvars.start_time + ms;
             front_player->seek_pos = (front_player->cmnvars.start_time + ms) * AV_TIME_BASE / 1000;
-            front_player->seek_diff = 100;
+            front_player->seek_diff = 1000; // Play position event (in 1 second, callback) provided
             front_player->seek_sidx = -1;
             break;
     }

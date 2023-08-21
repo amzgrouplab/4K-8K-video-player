@@ -1,0 +1,57 @@
+1. Bugs
+- Abnormal termination when MSG_D3D_DEVICE_LOST notification occurs (fixed)
+- MSG_PLAY_COMPLETED notification does not occur, so playback end point is not known (fixed)
+- Videos play infinitely (fixed)
+
+- SEEK FORWARD
+    : Sometimes moving backwards instead of forwards (fixed)
+    : If you press ctrl+F continuously at intervals of about 1 second, playback stops. In the output window, seek busy! (fixed)
+    : If you quickly press ctrl+F to move to the end of the video, the video will play again from the beginning.
+       At this time, pressing ctrl+F again moves to the end of the video and stops playback (fixed)
+    : In the document, it is said to move 10 seconds, but in reality there are cases where it moves 2 or 3 seconds or moves backward (fixed)
+-SEEK BACKWARD
+     : It is said to move 10 seconds in the document, but it actually goes back to the beginning of the video or moves to 30 seconds ago (fixed)
+- Only 4K video is played. In the case of rear video, it is FHD, so FHD must also be played (not requirement)
+
+2.Build
+- Link error when building with Win32 (fixed)
+   : No library files for 32bit (avkcpdemuxer.lib, ffrdpdemuxer.lib, fanplayer.lib)
+
+3. Questions
+- playBackwordVideo
+void* playBackwordVideo(char* rearvideo_path, char* frontvideo_path, void* win, PLAYER_INIT_PARAMS* params)
+
+playBackwordVideo function is similar to play_open
+But it has both rear video and front video paths and then it plays only rear video and front audio at the same time.
+mainplayer->rear_player->init_params.audio_stream_cur = -1; //don't play rear audio
+mainplayer->front_player->init_params.video_stream_cur= -1; //don't play front video
+
+- player_setrect
+
+This is for configuring the video render area.
+The main render function is render_video.
+-fanplayer.ini
+
+This is for switching the video rendering method between Hardware accelerated decoding and FFmpeg decoding
+Hardware acceleration refers to offloading some or all of the decoding operations to specialized hardware, such as a GPU or dedicated media decoding chip. This significantly speeds up the decoding process, reduces CPU usage, and improves overall playback performance.
+
+FFmpeg decoding is the process of using the FFmpeg library to decode compressed video and audio streams in multimedia applications.
+FFmpeg decoding relies on software decoding, which is performed entirely by the CPU. While software decoding has lower hardware requirements, it can be much slower and resource-intensive than hardware acceleration.
+
+Hardware accelerated decoding configuration method:
+video_hwaccel is configured to 1,
+video_thread_count configured to 1,
+vdev_render_type configured to 1
+
+Other parameters are the initial parameter for the player. Please use these for the initial format.
+
+- CplayerDlg::OnPlaySpeedType()
+
+We can select Swresample and SoundTouch in this function for the audio process.
+The default is Swresample.
+Swresample and SoundTouch are both libraries used for audio processing in multimedia applications.
+Swresample is a library in the FFmpeg project, a collection of open-source tools and libraries for handling multimedia.
+SoundTouch is a standalone audio processing library that is used for time-stretching and pitch-shifting of audio streams.
+I just implemented this function, but this is not a requirement.
+Default is Swresample.
+CTRL+T

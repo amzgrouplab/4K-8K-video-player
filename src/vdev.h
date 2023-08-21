@@ -1,7 +1,7 @@
 #ifndef __FANPLAYER_VDEV_H__
 #define __FANPLAYER_VDEV_H__
 
-// 包含头文件
+// ?????
 #include <pthread.h>
 #include "ffplayer.h"
 #include "ffrender.h"
@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-// 常量定义
+// constant definition
 #define VDEV_CLOSE      (1 << 0)
 #define VDEV_COMPLETED  (1 << 1)
 #define VDEV_CLEAR      (1 << 2)
@@ -66,36 +66,36 @@ extern "C" {
     BYTE       *poverlay; \
     RECTOVERLAY overlay_rects[8];
 
-// 类型定义
-typedef struct {
-    VDEV_COMMON_MEMBERS
+// type definition
+    typedef struct {
+        VDEV_COMMON_MEMBERS
 #ifdef WIN32
-    VDEV_WIN32__MEMBERS
+            VDEV_WIN32__MEMBERS
 #endif
-} VDEV_COMMON_CTXT;
+    } VDEV_COMMON_CTXT;
 
 #ifdef WIN32
-void* vdev_gdi_create(void *surface, int bufnum);
-void* vdev_d3d_create(void *surface, int bufnum);
-void  vdev_win32_render_overlay(void *ctxt, HDC hdc, int erase);
-void  vdev_win32_render_bboxes (void *ctxt, HDC hdc, void *boxlist);
+    void* vdev_gdi_create(void* surface, int bufnum);
+    void* vdev_d3d_create(void* surface, int bufnum);
+    void  vdev_win32_render_overlay(void* ctxt, HDC hdc, int erase);
+    void  vdev_win32_render_bboxes(void* ctxt, HDC hdc, void* boxlist);
 #endif
 
 #ifdef ANDROID
-void* vdev_android_create(void *surface, int bufnum);
+    void* vdev_android_create(void* surface, int bufnum);
 #endif
 
-// 函数声明
-void* vdev_create  (int type, void *surface, int bufnum, int w, int h, int ftime, CMNVARS *cmnvars);
-void  vdev_destroy (void *ctxt);
-void  vdev_lock    (void *ctxt, uint8_t *buffer[8], int linesize[8], int64_t pts);
-void  vdev_unlock  (void *ctxt);
-void  vdev_setrect (void *ctxt, int x, int y, int w, int h);
-void  vdev_setparam(void *ctxt, int id, void *param);
-void  vdev_getparam(void *ctxt, int id, void *param);
+    // function declaration
+    void* vdev_create(int type, void* surface, int bufnum, int w, int h, int ftime, CMNVARS* cmnvars);
+    void  vdev_destroy(void* ctxt);
+    void  vdev_lock(void* ctxt, uint8_t* buffer[8], int linesize[8], int64_t pts);
+    void  vdev_unlock(void* ctxt);
+    void  vdev_setrect(void* ctxt, int x, int y, int w, int h);
+    void  vdev_setparam(void* ctxt, int id, void* param);
+    void  vdev_getparam(void* ctxt, int id, void* param);
 
-// internal helper function
-void  vdev_avsync_and_complete(void *ctxt);
+    // internal helper function
+    void  vdev_avsync_and_complete(void* ctxt);
 
 #ifdef __cplusplus
 }

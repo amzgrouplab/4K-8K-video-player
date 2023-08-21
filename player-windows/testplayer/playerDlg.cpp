@@ -512,23 +512,21 @@ BOOL CplayerDlg::PreTranslateMessage(MSG *pMsg)
                 m_nPlayerStatus++;
                 if (m_bPlayerMode == true) {
                     m_nPlayerStatus = 0;
-                    //PlayerOpenFile(NULL);
+                    OnStop();
+                    AfxMessageBox(_T("Ended"), MB_OK);
                 }
                 else {
                     if (m_nPlayerStatus == 2) {
                         m_nPlayerStatus = 0;
-                        //PlayerOpenFile(NULL);
+                        OnStop();
+                        AfxMessageBox(_T("Ended"), MB_OK);
                     }
                 }
             }
             break;
         case MSG_D3D_DEVICE_LOST:
-            PLAYER_INIT_PARAMS params;
-            player_getparam(m_ffPlayer, PARAM_PLAYER_INIT_PARAMS, &params);
-            player_getparam(m_ffPlayer, PARAM_MEDIA_POSITION, &m_llLastPos);
-            m_bResetPlayer = TRUE;
-            m_strTxt[0]    = '\0';
-            PlayerReset(&params);
+            OnStop();
+            AfxMessageBox(_T("Cannot use Direct3D to play video at this moment. Please try again."), MB_OK);
             break;
         }
         return TRUE;
@@ -624,7 +622,7 @@ void CplayerDlg::OnTakeSnapshot()
 
 void CplayerDlg::OnStepForward()
 {
-    player_seek(m_ffPlayer, 5000, SEEK_STEP_FORWARD);
+    player_seek(m_ffPlayer, 10000, SEEK_STEP_FORWARD);
     //m_bPlayPause = TRUE;
     _tcscpy(m_strTxt, TEXT("step forward"));
     PlayerShowText(2000);
@@ -632,7 +630,7 @@ void CplayerDlg::OnStepForward()
 
 void CplayerDlg::OnStepBackward()
 {
-    player_seek(m_ffPlayer, -5000, SEEK_STEP_BACKWARD);
+    player_seek(m_ffPlayer, 10000, SEEK_STEP_BACKWARD);
     //m_bPlayPause = TRUE;
     _tcscpy(m_strTxt, TEXT("step backward"));
     PlayerShowText(2000);
